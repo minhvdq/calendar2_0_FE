@@ -9,9 +9,6 @@ function App() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null);
 
-
-  window.customLoca
-
   const handlePassword = (event) => {
     setPassword(event.target.value)
     console.log(event.target.value)
