@@ -24,7 +24,7 @@ const getItem = (key) =>
     }
 
 const setItem = (key, val) => {
-    let maxAge = 60*1000;
+    let maxAge = 60*60*1000;
     let result = {data: val}
 
     if(maxAge){

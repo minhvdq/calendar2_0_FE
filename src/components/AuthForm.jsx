@@ -1,17 +1,18 @@
 import PropTypes from 'prop-types'
 
-const AuthForm = ({ handleLogin, email, password, handleEmail, handlePassword }) => {
+const AuthForm = ({ handleLogin, email, password, handleEmail, handlePassword, error }) => {
   return(
     <form onSubmit = {handleLogin}>
       <div>
-        email:
+        email: 
         <input id='email' type = "text" name = "email" value = {email} onChange = {handleEmail} />
       </div>
       <div>
-        password
+        password:
         <input id='password' type='text' name = 'password' value = {password} onChange = {handlePassword} />
       </div>
       <button id='login_button' type='submit'> login </button>
+      {error}
     </form>
   )
 }
