@@ -5,4 +5,9 @@ const getAll = async () => {
     return await axios.get(baseUrl)
 }
 
-export default {getAll}
+const getForUser = async (userId) => {
+    const url = `${baseUrl}/user/${userId}`
+    return await axios.get(url)
+}
+
+export default {getAll, getMonthly, getForUser}

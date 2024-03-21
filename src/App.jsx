@@ -13,35 +13,19 @@ function App() {
   const [error, setError] = useState(null)
   //const [logged, setLogged] = useState(false)
   const [events, setEvents] = useState([])
-  const [curUserEvents, setCurUserEvents] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    eventServices.getAll().then(res => {
-      const allEvents = res.data
-      setEvents(res.data)
-      const loggedUser = customStorage.getItem('localUser')
-      if(loggedUser){
-        const lUser = JSON.parse(loggedUser)
-        setCurUser(lUser);
-        const validEvents = allEvents.filter(event => checkEvent(event, lUser.events))
-        console.log(validEvents.length, "is length")
-        setCurUserEvents(validEvents)
+    const loggedUser = customStorage.getItem('localUser')
+    if(loggedUser){
+      const lUser = JSON.parse(loggedUser)
+      setCurUser(lUser);
+      eventServices.getForUser(lUser.id).then(res => {
+        setEvents(res.data)
         setLoading(false)
-      }
-      
-    })
-  },[])
-
-  //method to check if an event match as of an user
-  const checkEvent = (eve, eve_ids) => {
-    for(let eve_id of eve_ids){
-      if( eve[0] == eve_id){
-        return true
-      }
+      })
     }
-    return false
-  }
+  },[])
 
   const handlePassword = (event) => {
     setPassword(event.target.value)
@@ -57,9 +41,8 @@ function App() {
       const logUser = await loginService.login({email: email, password})
 
       //get all the events match current user
-      const validEvents = events.filter(event => checkEvent(event, logUser.events))
-      console.log(validEvents.length, "is length")
-      setCurUserEvents(validEvents)
+      const validEvents = await eventServices.getForUser(logUser.id)
+      setEvents(validEvents.data)
 
       //handle logging in
       setCurUser(logUser);
@@ -99,10 +82,9 @@ function App() {
   }
 
   const mainPage = () => {
-    console.log('haha', curUserEvents.length)
     return(
       <div>
-        <MainPage handleLogout = {handleLogout} events = {curUserEvents} />
+        <MainPage handleLogout = {handleLogout} events = {events} user = {curUser} />
       </div>
     )
   }

@@ -6,35 +6,30 @@ import moment from "moment"
 
 
 
-const MainPage = ({handleLogout, events}) => {
-    console.log('event size is', events.length)
+const MainPage = ({handleLogout, events, user}) => {
     const localizer = momentLocalizer(moment);
+    console.log('event size', events)
 
-    const Events = [
-    {
-      title: 'Meeting',
-      start: moment('2024-03-01T10:00:00').toDate(), // Convert moment object to JavaScript Date object
-      end: moment('2024-03-01T11:00:00').toDate(), // Convert moment object to JavaScript Date object
-    },
+    const email = user.email
+    const username = email.split("@")[0]
+    const Events = events.map(event => {
+      return {
+        title: event.TITLE,
+        start: moment(event.START_TIME).toDate(),
+        end: moment(event.END_TIME).toDate(),
+        descriptions: event.DESCRIPTIONS,
+        location: event.LOCATION,
+        period: event.PERIOD
+      }})
 
-    {
-        title: 'Meeting important',
-        start: moment('2024-03-16T19:00:00').toDate(), // Convert moment object to JavaScript Date object
-        end: moment('2024-03-16T20:00:00').toDate(), // Convert moment object to JavaScript Date object
-      },
-    // Add more events as needed
-  ];
+    console.log('envet Size is', Events.length)
     return(
 
         <div>
-            
             <button onClick={handleLogout}>Log out</button>
+            {username} logged in
 
-            <h1>The events available</h1>
-            {events.map(event => (
-                <Event key={event[0]} event = {event} />
-            ))}
-
+            <h1> Main Page</h1>
 
     <Calendar
       localizer={localizer}
