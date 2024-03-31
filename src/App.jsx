@@ -66,6 +66,23 @@ function App() {
     setEmail('')
     setPassword('')
   }
+  const handleAddEvent = async (eventData)=>{
+    try {
+      console.log("Handle adding event " + eventData);
+      const userId= curUser.id;
+      await eventServices.addEvent(eventData,userId);
+    } catch (error) {
+      console.error("Error adding event " + error);
+    }
+  }
+
+  const handleEditEvent = async (eventData,eventID)=>{
+    try {
+      await eventServices.editEvent(eventData,eventID);
+    } catch (error) {
+      console.error("Error adding event " + error);
+    }
+  }
 
   const loginForm = () => {
     return(
@@ -84,7 +101,7 @@ function App() {
   const mainPage = () => {
     return(
       <div>
-        <MainPage handleLogout = {handleLogout} events = {events} user = {curUser} />
+        <MainPage handleLogout = {handleLogout} handleAddEvent={handleAddEvent} handleEditEvent={handleEditEvent} events = {events} user = {curUser} />
       </div>
     )
   }
