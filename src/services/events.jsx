@@ -10,4 +10,4 @@ const getForUser = async (userId) => {
     return await axios.get(url)
 }
 
-export default {getAll, getMonthly, getForUser}
+export default {getAll, getForUser}
