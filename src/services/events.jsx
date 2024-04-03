@@ -10,4 +10,16 @@ const getForUser = async (userId) => {
     return await axios.get(url)
 }
 
-export default {getAll, getForUser}
+const addEvent = async (eventData,userId)=>{
+    const url = `${baseUrl}/addEvents/${userId}`
+    await axios.post(url,eventData)
+}
+
+const editEvent = async (eventData,userId)=>{
+    const url = `${baseUrl}/editEvents/${userId}`
+    await axios.post(url,eventData)
+}
+
+
+
+export default {getAll, getForUser,addEvent,editEvent}
