@@ -5,6 +5,7 @@ import loginService from './services/login'
 import customStorage from './services/customStorage'
 import eventServices from './services/events'
 import Togglable from './components/Togglable'
+import moment from "moment"
 
 function App() {
   const [curUser, setCurUser] = useState(null)
@@ -14,6 +15,8 @@ function App() {
   //const [logged, setLogged] = useState(false)
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
+  const [feEvents, setFeEvents] = useState([])
+  
 
   useEffect(() => {
     const loggedUser = customStorage.getItem('localUser')
@@ -22,7 +25,19 @@ function App() {
       setCurUser(lUser);
       eventServices.getForUser(lUser.id).then(res => {
         setEvents(res.data)
-        setLoading(false)
+        const eventsForFe = res.data.map(event => {
+          return {
+            id: event.EVENT_ID,
+            title: event.TITLE,
+            start: moment(event.START_TIME).toDate(),
+            end: moment(event.END_TIME).toDate(),
+            descriptions: event.DESCRIPTIONS,
+            location: event.LOCATION,
+            period: event.PERIOD,
+            groupId: event.GROUP_ID
+          }
+        })
+        setFeEvents(eventsForFe)
       })
     }
   },[])
@@ -43,6 +58,20 @@ function App() {
       //get all the events match current user
       const validEvents = await eventServices.getForUser(logUser.id)
       setEvents(validEvents.data)
+
+      const eventsForFe = validEvents.data.map(event => {
+        return {
+          id: event.EVENT_ID,
+          title: event.TITLE,
+          start: moment(event.START_TIME).toDate(),
+          end: moment(event.END_TIME).toDate(),
+          descriptions: event.DESCRIPTIONS,
+          location: event.LOCATION,
+          period: event.PERIOD,
+          groupId: event.GROUP_ID
+        }
+      })
+      setFeEvents(eventsForFe)
 
       //handle logging in
       setCurUser(logUser);
@@ -66,11 +95,68 @@ function App() {
     setEmail('')
     setPassword('')
   }
+
+  const handleAddManyEvents = async (eventDatas) =>{
+    try{
+      let addFeEvents = []
+      for( let eventData of eventDatas){
+        console.log("Handle adding event " + JSON.stringify(eventData));
+        const userId= curUser.id;
+        const event = await eventServices.addEvent(eventData,userId);
+        const newEvent = event.data
+        console.log("Handle adding event 2 " + JSON.stringify(newEvent));
+
+
+        let newEventForFe = {
+            id: newEvent.EVENT_ID,
+            title: newEvent.TITLE,
+            start: moment(newEvent.START_TIME).toDate(),
+            end: moment(newEvent.END_TIME).toDate(),
+            descriptions: newEvent.DESCRIPTIONS,
+            location: newEvent.LOCATION,
+            period: newEvent.PERIOD,
+            groupId: newEvent.GROUP_ID
+          }
+
+        console.log('newly added event is', newEventForFe)
+        addFeEvents.push(newEventForFe)
+      }
+
+      const newFeEvents = feEvents.concat(addFeEvents)
+      console.log('size of add events is: ', addFeEvents.length)
+      setFeEvents(newFeEvents)
+
+      console.log('added events size is ', feEvents)
+
+    }catch( error ){
+      console.error("Error adding many event " + error);
+    }
+  }
+
   const handleAddEvent = async (eventData)=>{
     try {
       console.log("Handle adding event " + eventData);
       const userId= curUser.id;
-      await eventServices.addEvent(eventData,userId);
+      const newEvent = await eventServices.addEvent(eventData,userId);
+
+      console.log('event data', newEvent.data.START_TIME)
+      const newEvents = events.concat([newEvent.data])
+      setEvents(newEvents)
+
+      const newEventForFe = newEvents.map(event => {
+        return{
+          id: event.EVENT_ID,
+          title: event.TITLE,
+          start: moment(event.START_TIME).toDate(),
+          end: moment(event.END_TIME).toDate(),
+          descriptions: event.DESCRIPTIONS,
+          location: event.LOCATION,
+          period: event.PERIOD,
+          groupId: event.GROUP_ID
+        }
+      })
+      setFeEvents(newEventForFe)
+
     } catch (error) {
       console.error("Error adding event " + error);
     }
@@ -79,9 +165,64 @@ function App() {
   const handleEditEvent = async (eventData,eventID)=>{
     try {
       await eventServices.editEvent(eventData,eventID);
+
+      
+      const newEvents = events.map(event => event.EVENT_ID === eventID ? eventData : event)
+      setEvents(newEvents)
+
+      console.log('adjusted start time', eventData.START_TIME)
+
+      const newEventsForFe = newEvents.map(event => {
+        console.log('adjusting time', event.START_TIME)
+        return{
+          id: event.EVENT_ID,
+          title: event.TITLE,
+          start: moment(event.START_TIME).toDate(),
+          end: moment(event.END_TIME).toDate(),
+          descriptions: event.DESCRIPTIONS,
+          location: event.LOCATION,
+          period: event.PERIOD,
+          groupId: event.GROUP_ID
+        }
+      })
+
+      setFeEvents(newEventsForFe)
+
     } catch (error) {
       console.error("Error adding event " + error);
     }
+  }
+
+  // const reformatTime = (time) => {
+  //   const components = time.split("T")
+  //   let timeComps = components[1].split(":")
+  //   let finalTime = ""
+  //   let counter = 0
+  //   for(let timeComp of timeComps ){
+  //     if( timeComp.toString().length === 1){
+  //       finalTime += `0${timeComp}`
+  //       if( counter  === 2 && !timeComp.toString().includes('Z')){
+  //         finalTime += '.000Z'
+  //       }
+  //     }else{
+  //       finalTime += `${timeComp}`
+  //     }
+  //     counter ++
+  //     if(counter !== 3){
+  //       finalTime += ":"
+  //     }
+  //   }
+  //   return `${components[0]}T${finalTime}`
+  // }
+
+  const handleDeleteEvent = async(id) => {
+    await eventServices.deleteEvent(id);
+    const eventsAfterDeleted = events.filter(event => event.EVENT_ID !== id)
+    setEvents(eventsAfterDeleted)
+
+    const feEventsAfterDeleted = feEvents.filter(event => event.id !== id)
+    setFeEvents(feEventsAfterDeleted)
+    
   }
 
   const loginForm = () => {
@@ -101,7 +242,7 @@ function App() {
   const mainPage = () => {
     return(
       <div>
-        <MainPage handleLogout = {handleLogout} handleAddEvent={handleAddEvent} handleEditEvent={handleEditEvent} events = {events} user = {curUser} />
+        <MainPage handleLogout = {handleLogout} handleAddEvent={handleAddEvent} handleAddManyEvents={handleAddManyEvents} handleEditEvent={handleEditEvent} handleDeleteEvent = {handleDeleteEvent} feEvents = {feEvents} user = {curUser} />
       </div>
     )
   }

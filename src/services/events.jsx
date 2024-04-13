@@ -12,7 +12,7 @@ const getForUser = async (userId) => {
 
 const addEvent = async (eventData,userId)=>{
     const url = `${baseUrl}/addEvents/${userId}`
-    await axios.post(url,eventData)
+    return await axios.post(url,eventData)
 }
 
 const editEvent = async (eventData,userId)=>{
@@ -20,6 +20,11 @@ const editEvent = async (eventData,userId)=>{
     await axios.post(url,eventData)
 }
 
+const deleteEvent = async (eventId) => {
+    const url = `${baseUrl}/${eventId}`
+    await axios.delete(url)
+}
 
 
-export default {getAll, getForUser,addEvent,editEvent}
+
+export default {getAll, getForUser, addEvent, editEvent, deleteEvent}
