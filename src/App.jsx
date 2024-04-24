@@ -165,16 +165,10 @@ function App() {
   const handleEditEvent = async (eventData,eventID)=>{
     try {
       await eventServices.editEvent(eventData,eventID);
+      const updatedEvents = await eventServices.getForUser(curUser.id);
 
-      
-      const newEvents = events.map(event => event.EVENT_ID === eventID ? eventData : event)
-      setEvents(newEvents)
-
-      console.log('adjusted start time', eventData.START_TIME)
-
-      const newEventsForFe = newEvents.map(event => {
-        console.log('adjusting time', event.START_TIME)
-        return{
+      const updatedFeEvents = updatedEvents.data.map(event => {
+        return {
           id: event.EVENT_ID,
           title: event.TITLE,
           start: moment(event.START_TIME).toDate(),
@@ -183,14 +177,54 @@ function App() {
           location: event.LOCATION,
           period: event.PERIOD,
           groupId: event.GROUP_ID
-        }
-      })
-
-      setFeEvents(newEventsForFe)
-
+        };
+      });
+      setFeEvents(updatedFeEvents);
     } catch (error) {
       console.error("Error adding event " + error);
     }
+  }
+  const handleMultipleEventsChange = async (eventData,eventID)=>
+  {
+    try {
+      await eventServices.editMultipleEvent (eventData,eventID);
+      const updatedEvents = await eventServices.getForUser(curUser.id);
+
+      const updatedFeEvents = updatedEvents.data.map(event => {
+        return {
+          id: event.EVENT_ID,
+          title: event.TITLE,
+          start: moment(event.START_TIME).toDate(),
+          end: moment(event.END_TIME).toDate(),
+          descriptions: event.DESCRIPTIONS,
+          location: event.LOCATION,
+          period: event.PERIOD,
+          groupId: event.GROUP_ID
+      };
+    });
+    setFeEvents(updatedFeEvents);
+    } catch (error) {
+      console.error("Error adding event " + error);
+    }
+  }
+
+  const handleDeleteMultipleEvents = async (eventID)=>{
+    await eventServices.deleteMultipleEvents(eventID)
+    const updatedEvents = await eventServices.getForUser(curUser.id);
+
+    const updatedFeEvents = updatedEvents.data.map(event => {
+      return {
+        id: event.EVENT_ID,
+        title: event.TITLE,
+        start: moment(event.START_TIME).toDate(),
+        end: moment(event.END_TIME).toDate(),
+        descriptions: event.DESCRIPTIONS,
+        location: event.LOCATION,
+        period: event.PERIOD,
+        groupId: event.GROUP_ID
+      };
+    });
+    setFeEvents(updatedFeEvents);
   }
 
   // const reformatTime = (time) => {
@@ -242,7 +276,7 @@ function App() {
   const mainPage = () => {
     return(
       <div>
-        <MainPage handleLogout = {handleLogout} handleAddEvent={handleAddEvent} handleAddManyEvents={handleAddManyEvents} handleEditEvent={handleEditEvent} handleDeleteEvent = {handleDeleteEvent} feEvents = {feEvents} user = {curUser} />
+        <MainPage handleLogout = {handleLogout} handleAddEvent={handleAddEvent} handleAddManyEvents={handleAddManyEvents} handleEditEvent={handleEditEvent} handleDeleteEvent = {handleDeleteEvent} handleMultipleEventsChange= {handleMultipleEventsChange} handleDeleteMultipleEvents={handleDeleteMultipleEvents} feEvents = {feEvents} user = {curUser} />
       </div>
     )
   }

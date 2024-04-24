@@ -24,7 +24,16 @@ const deleteEvent = async (eventId) => {
     const url = `${baseUrl}/${eventId}`
     await axios.delete(url)
 }
+const editMultipleEvent = async(eventData,eventId)=>
+{
+    const url = `${baseUrl}/editMultipleEvents/${eventId}`
+    await axios.put(url, eventData)
+}
+const deleteMultipleEvents = async (eventID)=>{
+    const url = `${baseUrl}/deleteMultipleEvents/${eventID}`
+    await axios.delete(url)
+}
 
 
 
-export default {getAll, getForUser, addEvent, editEvent, deleteEvent}
+export default {getAll, getForUser, addEvent, editEvent, deleteEvent,editMultipleEvent, deleteMultipleEvents}

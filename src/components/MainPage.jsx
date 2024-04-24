@@ -19,7 +19,7 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEditEvent, handleDeleteEvent, feEvents, user}) => {
+const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEditEvent, handleDeleteEvent,handleMultipleEventsChange, handleDeleteMultipleEvents, feEvents, user}) => {
     const localizer = momentLocalizer(moment);
     console.log('event size', feEvents)
     const email = user.email
@@ -37,7 +37,6 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
     const [formatedEndTime, setSelectedEndTime] = useState(new Date());
     const [selectedEvent, setSelectedEvent] = useState(null)
     const [modal, setModal] = useState(null)
-    const [period, setPeriod] = useState(null)
     // const [feEvents, setFeEvents] = useState([])
     // const mappedEvents = events.map(event => {
     //   return {
@@ -86,9 +85,12 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
     const handleSelectedEvent = (event)=>{
       console.log(event);
       setSelectedEvent(event);
-      setModal(true)
       setSelectedStartTime(moment(event.start).toDate()); // Set formatedStartTime to the start time of the selected event
       setSelectedEndTime(moment(event.end).toDate());
+      setStartTime(formatTimeHour(selectedEvent.start))
+      setEndTime(formatTimeHour(selectedEvent.end))
+      setModal(true)
+   
     }
 
     const handleEndTimeChange = (date) => {
@@ -98,7 +100,31 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
     const closeModal =()=>{
       setModal(false);
     }
+    const formatTimeHour = (date)=>{
+      console.log("date is ",date)
+      let hours = String(date.getHours()).padStart(2,'0')
+      let minutes = String(date.getMinutes()).padStart(2,'0')
+      console.log("hours is ",hours)
+      console.log("minutes is ", minutes)
+      let time = hours+":"+minutes
+      console.log("time is " +time)
+      return time
+    }
 
+    const formatTime2 = (time)=>{
+      console.log("Before formating time is " + time)
+      let parseStartTime = new Date(time);
+      let year= parseStartTime.getFullYear();
+      let month = parseStartTime.getMonth() + 1;
+      let day= parseStartTime.getDate();
+      let hours = parseStartTime.getHours();
+      let minutes = parseStartTime.getMinutes();
+      let seconds = parseStartTime.getSeconds();
+
+      const formattedTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+      console.log("after formating time is " + formattedTime)
+      return formattedTime;
+    }
     //formating the time into the right format
     const formatTime = (date, time)=>{
       console.log("Before formating time is " + date + " " + time)
@@ -188,9 +214,6 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
           handleAddManyEvents(eventDatas);
         }
       }
-      
-      // window.location.reload()
-      // updateEvents();
     }
     const handleChange = (e) => {
       e.preventDefault();
@@ -198,17 +221,14 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
       const eventData = {
         EVENT_ID: selectedEvent.id,
         TITLE: selectedEvent.title,
-        START_TIME: formatTime(formatedStartTime),
-        END_TIME: formatTime(formatedEndTime),
+        START_TIME: formatTime2(formatedStartTime),
+        END_TIME: formatTime2(formatedEndTime),
         PERIOD: selectedEvent.period,
         LOCATION: selectedEvent.location,
         DESCRIPTIONS: selectedEvent.descriptions
       };
-      console.log(eventData);
       handleEditEvent(eventData, eventID);
       closeModal();
-      // window.location.reload()
-      // updateEvents();
     };
 
     console.log('envet Size is', feEvents.length)
@@ -234,7 +254,7 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
               <label for='startTime'>Start Time</label><br/>
               <TimePicker value={startTime} onChange={setStartTime} /><br/>
               
-              <label for='startTime'>End Time</label><br/>
+              <label for='endTime'>End Time</label><br/>
               <TimePicker value={endTime} onChange={setEndTime} /><br/>
 
               <input type="checkbox" id="coding" name="interest" value="coding" onClick={() => {
@@ -272,25 +292,75 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
               <form>
                 <label>Title:</label>
                 <input type="text" name="formatedTitle" value={selectedEvent.title} onChange={(e) => setSelectedEvent({...selectedEvent, title: e.target.value})} /><br/><br/>
-                <label>Start time:</label><br/>
-                <DateTimePicker onChange={(date)=> setSelectedStartTime(date)} value={formatedStartTime} defaultValue={selectedEvent.start} /><br/><br/>
-                <label>End time:</label><br/>
-                <DateTimePicker onChange={(date)=> setSelectedEndTime(date)} value={formatedEndTime} defaultValue={selectedEvent.end} /><br/><br/>
+                {selectedEvent.period == null && (
+                  <div>
+                    <label>Start time:</label><br/>
+                    <DateTimePicker onChange={(date)=> setSelectedStartTime(date)} value={formatedStartTime} defaultValue={selectedEvent.start} /><br/><br/>
+                    <label>End time:</label><br/>
+                    <DateTimePicker onChange={(date)=> setSelectedEndTime(date)} value={formatedEndTime} defaultValue={selectedEvent.end} /><br/><br/>
+                  </div>
+                )}
+                {selectedEvent.period != null && (
+                  <div>
+                        <label for='startTime'>Start Time</label><br/>
+                        <TimePicker value={startTime} onChange={setStartTime} defaultValue  ={formatTimeHour(selectedEvent.start)}/><br/>
+              
+                        <label for='endTime'>End Time</label><br/>
+                        <TimePicker value={endTime} onChange={setEndTime} /><br/>
+                  </div>
+                )}
                 <label>Descriptions:</label>
                 <input type="text" name="formatedDescriptions" value={selectedEvent.descriptions} onChange={(e) => setSelectedEvent({...selectedEvent, descriptions: e.target.value})} /><br/><br/>
                 <label>Location:</label>
-                <input type="text" name="formatedLocation" value={selectedEvent.location} onChange={(e) => setSelectedEvent({...selectedEvent, location: e.target.value})} />
+                <input type="text" name="formatedLocation" value={selectedEvent.location} onChange={(e) => setSelectedEvent({...selectedEvent, location: e.target.value})} /><br/>
+                <label>ID : {selectedEvent.id}</label>
               </form>
               </Modal.Body>
               <Modal.Footer>
-              <Button variant='secondary' onClick={() => {if (window.confirm("Do you really want delete this event?")) {handleDeleteEvent(selectedEvent.id); closeModal(); }}}>
+              <Button variant='warning' onClick={() => {if (window.confirm("Do you really want delete this event?")) {handleDeleteEvent(selectedEvent.id); closeModal(); }}}>
                 Delete
-              </Button>
-              <Button variant="secondary" onClick={closeModal}>
-                  Close
               </Button>
               <Button variant="primary" onClick={handleChange}>
                   Save Changes
+              </Button>
+              {selectedEvent.period != null &&(
+                <div>
+                    <Button variant='dark' 
+                            style={{marginRight:'10px'}}
+                            onClick ={()=>{
+                              if(window.confirm('Do you want to change all events from this point to the future'))
+                              {
+                                let eventID = selectedEvent.id
+                                const eventData ={
+                                                  EVENT_ID: selectedEvent.id,
+                                                  TITLE: selectedEvent.title,
+                                                  START_TIME: startTime,
+                                                  END_TIME: endTime,
+                                                  PERIOD: selectedEvent.period,
+                                                  LOCATION: selectedEvent.location,
+                                                  DESCRIPTIONS: selectedEvent.descriptions
+                                                }
+                                handleMultipleEventsChange(eventData,eventID) 
+                                closeModal()
+                              }
+                            }}        
+                    >
+                      Change all events
+                    </Button>
+                    <Button variant='danger' onClick={()=>{
+                      if(window.confirm('Do you want to delete all events from this point to the future'))
+                      {
+                          handleDeleteMultipleEvents(selectedEvent.id)
+                          closeModal()
+                      }
+                    }}>
+                      Delete all events
+                    </Button>
+                </div>
+             
+              )}
+                <Button variant="secondary" onClick={closeModal}>
+                  Close
               </Button>
               </Modal.Footer>
             </Modal>
