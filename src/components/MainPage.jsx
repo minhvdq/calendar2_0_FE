@@ -27,6 +27,7 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
 
     const [startTime, setStartTime] = useState('10:00');
     const [endTime, setEndTime] = useState('10:00');
+    const [period, setPeriod] = useState(1)
 
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
@@ -184,16 +185,20 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
           const formData = new FormData(e.target);
           let groupId = findGroupId();
           let p = parseInt(formData.get('eventPeriod'))
-          console.log('period', p)
+          console.log('period', period)
 
           console.log('start and end', startDate.getDate(), endDate.getDate())
           let enteredLoc = formData.get('eventLocation')
           let enteredDes = formData.get('eventDescription')
           let enteredTitle = formData.get('eventTitle')
 
-          let d = new Date( startDate )
 
-          while( d.getDate() <= endDate.getDate() ){
+          let d = new Date( startDate ).setHours(0,0,0,0)
+          let de = new Date( endDate ).setHours(0,0,0,0)
+
+          console.log('current Date adn end date', d, endDate)
+
+          while( d <= de ){
             console.log('current start date d and end date is',startDate, d, endDate)
 
             let startTimeFormated = formatTime(d, startTime)
@@ -203,7 +208,7 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
                 TITLE: enteredTitle,
                 START_TIME: startTimeFormated, 
                 END_TIME: endTimeFormated,
-                PERIOD: p,
+                PERIOD: parseInt(period),
                 LOCATION: enteredLoc,
                 DESCRIPTIONS: enteredDes,
                 GROUP_ID: groupId
@@ -211,6 +216,7 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
             eventDatas.push(eventData)
             d.setDate(d.getDate() + p)
           }
+          console.log('size event Datas', eventDatas.length)
           handleAddManyEvents(eventDatas);
         }
       }
@@ -264,10 +270,10 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
               
 
               <div id='set-period' style={{display: 'none'}}>
-                <lable for='startDate'>End Date: </lable><br/>
+                <lable htmlFor='startDate'>End Date: </lable><br/>
                 <DatePicker onChange={(date) => {setEndDate(date)}} selected={endDate} minDate={startDate}  /><br/>
-                <label for='period'>Period(days):</label>
-                <input type='number' min={1} name='eventPeriod' value={1} required /><br/>
+                <label htmlFor='period'>Period(days):</label>
+                <input type='number' min={1} name='eventPeriod' onChange={(e) => {e.preventDefault(); setPeriod(parseInt(e.target.value))}} value={period} required /><br/>
               </div>
               <input type='submit' value="submit"/>
             </form>
@@ -302,10 +308,10 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
                 )}
                 {selectedEvent.period != null && (
                   <div>
-                        <label for='startTime'>Start Time</label><br/>
+                        <label htmlFor='startTime'>Start Time</label><br/>
                         <TimePicker value={startTime} onChange={setStartTime} defaultValue  ={formatTimeHour(selectedEvent.start)}/><br/>
               
-                        <label for='endTime'>End Time</label><br/>
+                        <label htmlFor='endTime'>End Time</label><br/>
                         <TimePicker value={endTime} onChange={setEndTime} /><br/>
                   </div>
                 )}

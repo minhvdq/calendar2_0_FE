@@ -1,7 +1,17 @@
 import PropTypes from 'prop-types'
 import './AuthForm.css'
+import LoginForm from './LoginForm'
+import SignupForm from './SignupForm'
+import { useState } from "react";
 
 const AuthForm = ({ handleLogin, email, password, handleEmail, handlePassword, error }) => {
+  const [inLogin, setInLogin] = useState(true)
+
+  const togglePage = (e) => {
+    e.preventDefault()
+    setInLogin(!inLogin)
+  }
+
   return (
     <div className='container d-flex justify-content-center align-items-center min-vh-100 min-vw-100' >
 
@@ -13,36 +23,7 @@ const AuthForm = ({ handleLogin, email, password, handleEmail, handlePassword, e
           <p className='text-white fs-2' style={{fontFamily: "Courier New, Courier, monospace", fontWeight: "600"}}> Be verified! </p>
           <small className='text-white text-wrap text-center mb-3' style={{width: '17rem', fontFamily: "Courier New, Courier, monospace" }}>Join our better version of Google Calendar</small>
         </div>
-        <div className='col-md-6 right-box'>
-          <div className='row align-items-center'>
-            <div className='header-text mb-4 mt-4'>
-              <p className='h3'style={{fontFamily: "Courier New, Courier, monospace", fontWeight: "600", textAlign: "center"}}>Welcome back!</p>
-            </div>
-            <form onSubmit={handleLogin}>
-              <div className="row justify-content-center">
-                <label htmlFor="exampleFormControlInput1" className="form-label">Email address</label>
-                <div className='input-group mb-3'>
-                  <input type="email" className="form-control form-control-lg bg-light fs-6" id="exampleFormControlInput1" placeholder="name@example.com" value={email} onChange={handleEmail} />
-                </div>
-              </div>
-              <div>
-                <div className="row justify-content-center">
-                  <label htmlFor="inputPassword" className="col-form-label">Password</label>
-                  <div className='input-group mb-3'>
-                    <input type="password" id="inputPassword" className="form-control form-control-lg bg-light fs-6" aria-describedby="passwordHelpInline" placeholder='Your Password' value={password} onChange={handlePassword} />
-                  </div>
-                </div>
-              </div>
-              <div className='input-group mb-3 mt-2'>
-                <button type='submit' className="btn btn-primary w-100 fs-6"> login </button>
-              </div>
-              <p>
-                {error}
-              </p>
-              
-            </form>
-          </div>
-        </div>
+        {inLogin ? <LoginForm togglePage={togglePage} handleLogin={handleLogin} email={email} password={password} handleEmail={handleEmail} handlePassword={handlePassword} error={error}/> : <SignupForm togglePage={togglePage} />}
       </div>
     </div>
   )
