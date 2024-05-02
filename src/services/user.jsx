@@ -8,4 +8,4 @@ const signup = async (signInfo) => {
     return response.data
 }
 
-export default {signup}
+export default { signup }
