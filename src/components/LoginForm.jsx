@@ -30,7 +30,7 @@ const LoginForm = ({togglePage, handleLogin, email, password, handleEmail, handl
                     <div className='p-1'>
                       {error}
                   </div>
-                  <button type="button" className="btn btn-link" style={{padding: "0"}}>Forgot your password!</button>
+                  <button type="button" onClick={(e) => {e.preventDefault(); window.location.href = "http://localhost:3001/PasswordResetRequest/ui_assets/request.html"}} className="btn btn-link" style={{padding: "0"}}>Forgot your password!</button>
                 </div>
               </div>
             </form>
