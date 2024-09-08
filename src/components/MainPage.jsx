@@ -16,10 +16,28 @@ import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
 import 'react-clock/dist/Clock.css';
 import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
+import{ButtonGroup, Button }from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Calender.css';
 
+function CustomToolbar({openAddingModal}) {
+  return (
+    <div className="toolbar-container">
+
+
+      <div className="filter-container">
+        <ButtonGroup>
+          <Button className="bg-filter-off"><span className="label-filter-off">Day</span></Button>
+          <Button className="bg-filter-off"><span className="label-filter-off">Week</span></Button>
+          <Button className="bg-filter-off"><span className="label-filter-off">Month</span></Button>
+          <Button className="bg-filter-off"><span className="label-filter-off" onClick={openAddingModal}>Add</span></Button>
+        </ButtonGroup>
+
+
+      </div>
+    </div >
+  )
+}
 
 const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEditEvent, handleDeleteEvent,handleMultipleEventsChange, handleDeleteMultipleEvents, feEvents, user}) => {
     const localizer = momentLocalizer(moment);
@@ -39,8 +57,8 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
     const [formatedStartTime, setSelectedStartTime] = useState(new Date());
     const [formatedEndTime, setSelectedEndTime] = useState(new Date());
     const [selectedEvent, setSelectedEvent] = useState(null)
-    const [modal, setModal] = useState(null)
-    const [modalAdding,setModalAdding]=useState(null)
+    const [modal, setModal] = useState(true)
+    const [modalAdding,setModalAdding]=useState(false)
     const { defaultDate, formats } = useMemo(
       () => ({
         defaultDate: new Date(),
@@ -144,7 +162,7 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
       }
       return counter + 1
     }
-    const handleAddingEvent= (e)=>
+    const handleAddingEvent    = (e)=>
     {
       e.preventDefault();
       if( havePeriod == false ){
@@ -162,7 +180,8 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
         };
         if( window.confirm("Adding this event?") ){
           formData.get('eventTitle')
-          handleAddEvent(eventData);
+          handleAddEvent(eventData)
+          closeAddingModal()
         }
       }else{
         if( window.confirm("Adding all events?") ){
@@ -171,23 +190,25 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
           let groupId = findGroupId();
           let p = parseInt(formData.get('eventPeriod'))
           console.log('period', period)
+          
 
           console.log('start and end', startDate.getDate(), endDate.getDate())
           let enteredLoc = formData.get('eventLocation')
           let enteredDes = formData.get('eventDescription')
           let enteredTitle = formData.get('eventTitle')
 
+          let d = new Date( startDate )
 
-          let d = new Date( startDate ).setHours(0,0,0,0)
+          //let d = new Date( startDate ).setHours(0,0,0,0)
           let de = new Date( endDate ).setHours(0,0,0,0)
+          
+          while( d < de ){
+            let curDate = new Date(d)
+            let curDe = new Date(de)
+            console.log('current start date d and end date is ',startDate, curDate, curDe)
 
-          console.log('current Date adn end date', d, endDate)
-
-          while( d <= de ){
-            console.log('current start date d and end date is',startDate, d, endDate)
-
-            let startTimeFormated = formatTime(d, startTime)
-            let endTimeFormated = formatTime(d, endTime)
+            let startTimeFormated = formatTime(curDate, startTime)
+            let endTimeFormated = formatTime(curDate, endTime)
             
             const eventData = {
                 TITLE: enteredTitle,
@@ -199,10 +220,11 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
                 GROUP_ID: groupId
             };
             eventDatas.push(eventData)
-            d.setDate(d.getDate() + p)
+            d = curDate.setDate(curDate.getDate() + p)
           }
           console.log('size event Datas', eventDatas.length)
           handleAddManyEvents(eventDatas);
+          closeAddingModal()
         }
       }
     }
@@ -224,17 +246,15 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
 
     console.log('envet Size is', feEvents.length)
     return(
-        <div>
-        <div className='background'> 
-          <img src='https://images.unsplash.com/photo-1633526543814-9718c8922b7a?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'/>
-        </div>
-        <div className='calendarcontainer'>
-          <button className="Logout" onClick={handleLogout}>Log out</button>
+        <div  >
+        <div className='calendarcontainer' >
+          <div style={{position: 'relative'}}>
+            <button className="btn btn-danger" style={{position: 'absolute', right: '10px', top: '10px'}} onClick={handleLogout}>Log out</button>
+          </div>
+            <p style={{marginTop: "20px"}} className='HelloHeader'>Hello {username} </p>
 
-            <p className='HelloHeader'>Hello <h2>{username}</h2> </p>
-
-            <h1 className='HeadLine'> Your schedule</h1>
-            <button className='add-event-button' onClick={openAddingModal}>Add events</button>
+            {/* <h1 style={{position: 'fixed', left: '43%', marginBottom: "30px"}} className='HeadLine'> Your schedule</h1> */}
+            <button className='btn btn-primary' style={{marginBottom: '7px'}} onClick={openAddingModal}>Add events</button>
            {modalAdding && (
             <div className='Adding event modal'>
               <Modal show={modalAdding} onHide={closeAddingModal} centered size="lg">
@@ -247,20 +267,20 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
             
                     <form className='event-form'style={{ marginBottom: '180px', marginTop: '100px', marginLeft: '70px', marginRight: '70px', border: 'solid', padding: "20px" }} onSubmit={handleAddingEvent}>
                     
-                      <label for='title'>Event title:</label>
+                      <label htmlFor='title'>Event title:</label>
                       <input type='text' name='eventTitle' required/><br/>
-                      <label for='desciprtion'>Description: </label>
+                      <label htmlFor='desciprtion'>Description: </label>
                       <input type='text' name='eventDescription' required/><br/>
-                      <label for='location'>Location: </label>
+                      <label htmlFor='location'>Location: </label>
                       <input type='text' name='eventLocation' required/><br/>
 
-                      <lable for='startDate'>Start Date: </lable><br/>
+                      <label htmlFor='startDate'>Start Date: </label><br/>
                       <DatePicker onChange={(date) => {setStartDate(date)}} selected={startDate}  /><br/>
 
-                      <label for='startTime'>Start Time</label><br/>
+                      <label htmlFor='startTime'>Start Time</label><br/>
                       <TimePicker value={startTime} onChange={setStartTime} /><br/>
                       
-                      <label for='endTime'>End Time</label><br/>
+                      <label htmlFor='endTime'>End Time</label><br/>
                       <TimePicker value={endTime} onChange={setEndTime} /><br/>
 
                       <input type="checkbox" id="coding" name="interest" value="coding" onClick={() => {
@@ -270,7 +290,7 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
                       
 
                       <div id='set-period' style={{display: 'none'}}>
-                        <lable htmlFor='startDate'>End Date: </lable><br/>
+                        <label htmlFor='startDate'>End Date: </label><br/>
                         <DatePicker onChange={(date) => {setEndDate(date)}} selected={endDate} minDate={startDate}  /><br/>
                         <label htmlFor='period'>Period(days):</label>
                         <input type='number' min={1} name='eventPeriod' onChange={(e) => {e.preventDefault(); setPeriod(parseInt(e.target.value))}} value={period} required /><br/>
@@ -289,18 +309,19 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
            )}
           
             
-          <Calendar
+          <Calendar 
             localizer={localizer}
             views={['month','week','day']}
             events={feEvents}
             startAccessor="start"
             endAccessor="end"
-            style={{ height: 500 }}
+            style={{ height: '80vh' }}
             selectable={true}
             onSelectEvent={handleSelectedEvent}
             defaultView='month'
             formats={formats}
             defaultDate={defaultDate}
+            
           />
           {selectedEvent && modal && (
            <div className="modal show">
@@ -386,10 +407,10 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
             </Modal>
             </div>  
           )}
-          <div style={{height: '200px'}}>
-
-          </div>
         </div>
+        <footer style={{height:  '5vh', textAlign: 'center', marginTop: '3vh'}}>
+          <p>Copyright &#169; 2024 Calendar2_0. All Rights Reserved.</p>
+        </footer>
         </div>
 
         
