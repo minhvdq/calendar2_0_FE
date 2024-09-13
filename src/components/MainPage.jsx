@@ -20,25 +20,6 @@ import{ButtonGroup, Button }from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Calender.css';
 
-function CustomToolbar({openAddingModal}) {
-  return (
-    <div className="toolbar-container">
-
-
-      <div className="filter-container">
-        <ButtonGroup>
-          <Button className="bg-filter-off"><span className="label-filter-off">Day</span></Button>
-          <Button className="bg-filter-off"><span className="label-filter-off">Week</span></Button>
-          <Button className="bg-filter-off"><span className="label-filter-off">Month</span></Button>
-          <Button className="bg-filter-off"><span className="label-filter-off" onClick={openAddingModal}>Add</span></Button>
-        </ButtonGroup>
-
-
-      </div>
-    </div >
-  )
-}
-
 const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEditEvent, handleDeleteEvent,handleMultipleEventsChange, handleDeleteMultipleEvents, feEvents, user}) => {
     const localizer = momentLocalizer(moment);
     console.log('event size', feEvents)
@@ -251,7 +232,7 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
           <div style={{position: 'relative'}}>
             <button className="btn btn-danger" style={{position: 'absolute', right: '10px', top: '10px'}} onClick={handleLogout}>Log out</button>
           </div>
-            <p style={{marginTop: "20px"}} className='HelloHeader'>Hello {username} </p>
+            <p style={{marginTop: "20px"}} className='HelloHeader'>Welcome back {username} !</p>
 
             {/* <h1 style={{position: 'fixed', left: '43%', marginBottom: "30px"}} className='HeadLine'> Your schedule</h1> */}
             <button className='btn btn-primary' style={{marginBottom: '7px'}} onClick={openAddingModal}>Add events</button>
@@ -259,13 +240,12 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
             <div className='Adding event modal'>
               <Modal show={modalAdding} onHide={closeAddingModal} centered size="lg">
                   <Modal.Header closeButton>
-                    <Modal.Title>Adding Events</Modal.Title>
+                    <Modal.Title>Adding Panel</Modal.Title>
                   </Modal.Header>
                   <Modal.Body>
-                    <p className='HeaderModal'>Event details</p>
                   <div id="add-event-board" >
             
-                    <form className='event-form'style={{ marginBottom: '180px', marginTop: '100px', marginLeft: '70px', marginRight: '70px', border: 'solid', padding: "20px" }} onSubmit={handleAddingEvent}>
+                    <form className='event-form' onSubmit={handleAddingEvent}>
                     
                       <label htmlFor='title'>Event title:</label>
                       <input type='text' name='eventTitle' required/><br/>
@@ -295,7 +275,7 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
                         <label htmlFor='period'>Period(days):</label>
                         <input type='number' min={1} name='eventPeriod' onChange={(e) => {e.preventDefault(); setPeriod(parseInt(e.target.value))}} value={period} required /><br/>
                       </div>
-                      <input type='submit' value="submit"/>
+                      <input className='btn btn-primary' type='submit' value="submit"/>
                     </form>
                    </div>
                   </Modal.Body>
@@ -327,7 +307,7 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
            <div className="modal show">
             <Modal show={modal} onHide={closeModal} centered size="lg">
               <Modal.Header closeButton>
-                <Modal.Title>Event details</Modal.Title>
+                <Modal.Title>Event Panel</Modal.Title>
               </Modal.Header>
               <Modal.Body>
               <form>
@@ -386,7 +366,7 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
                               }
                             }}        
                     >
-                      Change all events
+                      Change all
                     </Button>
                     <Button variant='danger' onClick={()=>{
                       if(window.confirm('Do you want to delete all events from this point to the future'))
@@ -395,7 +375,7 @@ const MainPage = ({handleLogout, handleAddEvent, handleAddManyEvents, handleEdit
                           closeModal()
                       }
                     }}>
-                      Delete all events
+                      Delete all
                     </Button>
                 </div>
              
